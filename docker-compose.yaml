@@ -35,7 +35,7 @@ services:
   image: mysql:5.7
   volumes:
    - "./data:/var/lib/mysql"
-   - "./conf/mysql:/etc/mysql/conf.d"
+   - "./conf/mysql:/etc/mysql/conf.d/source"
   environment:
    MYSQL_ROOT_PASSWORD: #3$4%5^6&7
   ports:
@@ -43,6 +43,7 @@ services:
   networks:
    - php-develop-network
   container_name: "php-develop-mysql"
+  command: /bin/bash -c "cp /etc/mysql/conf.d/source/* /etc/mysql/conf.d/ && /entrypoint.sh mysqld"
 
  redis:
   image: "redis"
