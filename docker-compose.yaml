@@ -1,0 +1,59 @@
+version: '2.1'
+
+services:
+ nginx:
+  depends_on:
+   - "php"
+  image: "nginx"
+  volumes:
+   - "./conf/nginx/conf.d:/etc/nginx/conf.d"
+   - "./www:/usr/share/nginx/html"
+  ports:
+   - "80:80"
+  networks:
+   - php-develop-network
+  container_name: "php-develop-nginx"
+  command: /bin/bash -c "mkdir -p /var/www && ln -s /usr/share/nginx/html /var/www && nginx -g 'daemon off;'"
+ 
+ php:
+  image: "qifa-bs-dev-php-fpm"
+  volumes:
+   - "./www:/var/www/html"
+   - "./conf/supervisor/conf.d:/etc/supervisor/conf.d"
+   - "./conf/supervisor/supervisord.conf:/etc/supervisor/supervisord.conf"
+  ports:
+   - "9001:9001"
+  build:  
+   context: .
+   dockerfile: "Dockerfile.php"
+  networks:
+   - php-develop-network
+  container_name: "php-develop-php-fpm"
+  command: /bin/bash -c "service supervisor start && php-fpm"
+
+ mysql:
+  image: mysql:5.7
+  volumes:
+   - "./data:/var/lib/mysql"
+   - "./conf/mysql:/etc/mysql/conf.d"
+  environment:
+   MYSQL_ROOT_PASSWORD: #3$4%5^6&7
+  ports:
+   - "3306:3306"
+  networks:
+   - php-develop-network
+  container_name: "php-develop-mysql"
+
+ redis:
+  image: "redis"
+  ports:
+   - "6379:6379"
+  networks:
+   - php-develop-network
+  volumes:
+   - "./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf"
+  container_name: "php-develop-redis"
+  
+networks:
+ php-develop-network:
+  driver: bridge
